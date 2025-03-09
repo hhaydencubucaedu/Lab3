@@ -1,49 +1,60 @@
-package data; // This class belongs in the "data" package
+package data;
 
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
 import models.Artist;
+
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.stream.*;
 
 /**
- * DataLoader is responsible for reading the CSV file and converting it into Artist objects.
- * Basically, it takes raw text data and transforms it into something we can work with.
+ * DataLoader reads artist data from a CSV file and turns it into usable Artist objects.
+ * This version uses OpenCSV to handle commas and quotes properly.
  */
 public class DataLoader {
 
     /**
-     * Reads the CSV file and converts it into a list of Artist objects.
-     * @param filePath The location of the CSV file (like "data/artists.csv").
-     * @return A list of Artist objects (one for each row in the CSV file).
-     * @throws IOException If the file doesn't exist or something goes wrong while reading it.
+     * Loads artists from the provided CSV file using OpenCSV.
+     * @param filePath The path to the CSV file (e.g. "data/artists.csv")
+     * @return A list of Artist objects
+     * @throws IOException If the file can't be read or parsed
      */
     public static List<Artist> loadArtists(String filePath) throws IOException {
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get(filePath))) {
-            return reader.lines()  // Read all lines in the file
-                    .skip(1) // Skip the first row (header row with column names)
-                    .map(line -> line.split(",")) // Split each line into an array of values
-                    .map(DataLoader::mapToArtist) // Convert that array into an Artist object
-                    .collect(Collectors.toList()); // Collect everything into a List
+        try (
+                Reader reader = Files.newBufferedReader(Paths.get(filePath));
+                CSVReader csvReader = new CSVReader(reader)
+        ) {
+            List<String[]> records = csvReader.readAll();
+
+            // Skip the header row and convert the rest to Artist objects
+            return records.stream()
+                    .skip(1)
+                    .map(DataLoader::mapToArtist)
+                    .collect(Collectors.toList());
+
+        } catch (CsvException e) {
+            throw new IOException("Error parsing CSV file", e);
         }
     }
 
     /**
-     * Converts an array of strings (from one row in the CSV) into an Artist object.
-     * @param data An array of values from one row in the CSV.
-     * @return A new Artist object with the data filled in.
+     * Converts one row of CSV data (a String array) into an Artist object.
+     * Handles missing data and converts numbers safely.
      */
     private static Artist mapToArtist(String[] data) {
-        String name = data[0].trim(); // Artist name
-        String country = data[1].trim(); // Country of origin
-        int birthDate = Integer.parseInt(data[2].trim()); // Birth year
+        if (data.length < 6) {
+            return new Artist("Unknown", "Unknown", 0, null, 0);
+        }
 
-        // Death date is sometimes missing, so we check for that
-        Integer deathDate = data[3].trim().isEmpty() ? null : Integer.parseInt(data[3].trim());
+        String name = data[0].trim();    // artist
+        String country = data[1].trim(); // country
+        int birthDate = data[2].trim().isEmpty() ? 0 : (int) Double.parseDouble(data[2].trim());
+        Integer deathDate = data[3].trim().isEmpty() ? null : (int) Double.parseDouble(data[3].trim());
+        // data[4] = gender (not used)
+        int numArtworks = data[5].trim().isEmpty() ? 0 : Integer.parseInt(data[5].trim());
 
-        int numArtworks = Integer.parseInt(data[5].trim()); // Number of artworks
-
-        // Return a new Artist object with the parsed data
         return new Artist(name, country, birthDate, deathDate, numArtworks);
     }
 }
