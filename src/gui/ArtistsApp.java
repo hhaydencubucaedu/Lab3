@@ -1,4 +1,4 @@
-package gui; // This class is in the "gui" package because it handles the graphical interface
+package gui;
 
 import data.DataLoader;
 import models.Artist;
@@ -9,60 +9,50 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * ArtistsApp is a Java Swing application that displays artist data in a table.
- * This is the graphical version of our program.
+ * This class builds the GUI to show the artist data in a table.
  */
-public class ArtistsApp extends JFrame { // JFrame is the main window
+public class ArtistsApp extends JFrame {
 
-    /**
-     * Constructor: Sets up the GUI and displays artist data in a table.
-     * @param artists A list of Artist objects (our dataset).
-     */
     public ArtistsApp(List<Artist> artists) {
-        setTitle("Artists Database"); // Window title
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Ensures app closes when window is closed
-        setSize(900, 600); // Window size (900x600 pixels)
+        // Title bar text
+        setTitle("Artists Database - Female Artists");
 
-        // Column headers for our table
-        String[] columnNames = {"Name", "Country", "Birth Year", "Death Year", "Artworks"};
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(1000, 600); // Wide enough to see everything
 
-        // Convert the list of artists into a 2D array for the JTable
-        Object[][] data = new Object[artists.size()][5];
+        // Table headers
+        String[] columnNames = {"Name", "Country", "Birth Year", "Death Year", "Gender", "Artworks"};
 
-        // Loop through the list of artists and populate the table
+        // Fill in the table with artist data
+        Object[][] data = new Object[artists.size()][6];
         for (int i = 0; i < artists.size(); i++) {
-            Artist artist = artists.get(i);
-            data[i][0] = artist.getName();
-            data[i][1] = artist.getCountry();
-            data[i][2] = artist.getBirthDate();
-            data[i][3] = (artist.getDeathDate() != null) ? artist.getDeathDate() : "Still Alive";
-            data[i][4] = artist.getNumArtworks();
+            Artist a = artists.get(i);
+            data[i][0] = a.getName();
+            data[i][1] = a.getCountry();
+            data[i][2] = a.getBirthDate();
+            data[i][3] = (a.getDeathDate() != null) ? a.getDeathDate() : "Still Alive";
+            data[i][4] = a.getGender();
+            data[i][5] = a.getNumArtworks();
         }
 
-        // Create a JTable (a spreadsheet-like component) using our data and column names
+        // Set up the table
         JTable table = new JTable(new DefaultTableModel(data, columnNames));
-
-        // Put the table inside a scroll pane so we can scroll if there are many artists
         JScrollPane scrollPane = new JScrollPane(table);
-        add(scrollPane, BorderLayout.CENTER); // Add the scroll pane to the center of the window
+        add(scrollPane, BorderLayout.CENTER); // slap it in the middle
     }
 
-    /**
-     * Main method: Loads the data from the CSV file and starts the GUI.
-     */
     public static void main(String[] args) {
         try {
-            // Load the artist data from the CSV file
+            // Load the CSV data
             List<Artist> artists = DataLoader.loadArtists("data/artists.csv");
 
-            // Start the GUI
+            // Launch the GUI
             SwingUtilities.invokeLater(() -> {
                 ArtistsApp app = new ArtistsApp(artists);
-                app.setVisible(true); // Make the window visible
+                app.setVisible(true);
             });
-
-        } catch (IOException e) { // If the file isn't found or can't be read, print an error
-            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace(); // just in case
         }
     }
 }

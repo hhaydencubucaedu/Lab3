@@ -1,43 +1,36 @@
-package models; // This file belongs in the "models" package
+package models;
 
 /**
- * Artist class represents an artist from the dataset.
- * It stores basic details like name, country, birth/death dates, and number of artworks.
+ * This class represents a single artist from the dataset.
  */
 public class Artist {
     private String name;
     private String country;
     private int birthDate;
-    private Integer deathDate; // Nullable, since some artists are still alive
+    private Integer deathDate;
     private int numArtworks;
+    private String gender; // new gender field
 
-    /**
-     * Constructor: Creates a new Artist object with all necessary data.
-     */
-    public Artist(String name, String country, int birthDate, Integer deathDate, int numArtworks) {
+    // Constructor
+    public Artist(String name, String country, int birthDate, Integer deathDate, int numArtworks, String gender) {
         this.name = name;
         this.country = country;
         this.birthDate = birthDate;
         this.deathDate = deathDate;
         this.numArtworks = numArtworks;
+        this.gender = gender;
     }
 
-    // Getter methods to access private variables
-
+    // Getters for all fields (aka we use these to display stuff)
     public String getName() { return name; }
     public String getCountry() { return country; }
     public int getBirthDate() { return birthDate; }
-    public Integer getDeathDate() { return deathDate; } // Can be null
+    public Integer getDeathDate() { return deathDate; }
     public int getNumArtworks() { return numArtworks; }
+    public String getGender() { return gender; }
 
-    /**
-     * Converts the Artist object into a readable string format.
-     * If the artist is still alive, it shows "Present" instead of a death year.
-     */
     @Override
     public String toString() {
-        return name + " (" + country + ") - Born: " + birthDate +
-                (deathDate != null ? ", Died: " + deathDate : ", Still Alive") +
-                ", Artworks: " + numArtworks;
+        return name + " (" + country + ")";
     }
 }
